@@ -1,0 +1,26 @@
+
+--------vector-----------
+创建
+vector <> myvector;
+创建5个并初始化为10，10可省略，默认为0
+vector <> myvector(5,10);
+
+添加（推荐用emplace_back)
+myvector.emplace_back(...)
+
+访问（推荐用.at())
+myvector.at(1)
+
+获取大小.size()
+
+遍历（迭代器）
+for (auto it = people.begin(); it != people.end(); it++)
+	{
+		cout << it->name << it->gender << it->age << endl;
+	}
+
+删除(第i个）
+myvector.erase(myvector.begin()+i-1);
+
+清空
+myvector.clear()
