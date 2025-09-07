@@ -1,0 +1,58 @@
+git config --global user.name "用户名"
+git config --global user.email "邮箱"
+
+查看信息
+git config --global --list
+
+克隆仓库
+git clone https://...
+
+新建文件夹
+git init
+
+提交文件到暂存区
+git add abc.txt
+提交所有文件到暂存区
+git add .
+
+提交暂存区内容
+git commit -m "备注"
+
+查看提交信息
+git log
+
+恢复
+git reset --hard [commit id]
+git checkout [commit id]
+
+创建分支
+git branch (查看）
+git checkout -b develop (创建develop分支）
+git checkout master (切换到master分支)
+git merge develop (合并develop到master）
+
+绑定远程仓库
+git remote add 别名(github) 仓库地址
+
+推送到远程
+git push 别名(origin) master
+
+拉取
+git pull origin master
+
+提交流程：
+	1、创建（克隆/新建）
+	2、修改内容
+	3、git add
+	4、git commit
+
+单人开发流程
+	1、创建绑定仓库
+	2、切换到develop分支
+	3、编写代码
+	4、执行git add .
+	5、执行git commit提交
+	6、切换回master分支，也可push
+	7、执行git merge合并分支
+	8、git push 推送
+	

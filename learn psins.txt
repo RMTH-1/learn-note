@@ -1,0 +1,142 @@
+1、目录
+	base：核心算法、数据预处理和图形显示等库函数
+	data：样本数据、生成中间数据、或用户输入输出数据
+	demos：演示和测试例子
+	dlg：可视化（对话框）应用例子
+	doc：介绍和说明等文档
+	gnss：仅用于SINS/GNSS紧组合中卫导信号处理，但不太专业
+	mytest：用户自己的例子
+	vc60：VC6.0工程文件夹，导航核心算法用C++编写，可移植于嵌入式应用
+
+2、下载安装初始化
+	运行psinsinit.m文件初始化
+	运行psinsmain.m工具箱
+	
+3、test_SINS_trj.m轨迹仿真（理论轨迹）
+	trj = trjsimu(avp0, seg.wat, ts, 1); %轨迹重复一次
+	轨迹起始静止，结束静止；方便多次重复
+	欧拉角、速度、位置、二维平面图、三轴角速度、三轴比力
+
+4、test_SINS.m纯惯导仿真
+	要先运行轨迹仿真
+	欧拉角、速度、位置、二维平面图、失准角、速度误差、位置误差
+
+5、test_SINS_GPS_153.m组合导航仿真
+	15维状态，失准角、速度误差、位置误差、加速度计零偏、陀螺仪零偏
+	18维，杆臂误差；19维，时间不同步误差
+	3维观测，位置
+
+6、全局变量glvf里面
+	open glvf
+
+7、书写
+	角标：从左到右从上到下cnb
+	att=[pitch;roll;yaw] %右手绕轴转为正
+	imu=[wm;vm;t] %通常时标在最后一列；100hz时一般第六列0.098m/s
+	avp=[att;vn;pos;t] %姿态；速度；位置；时标
+	vn=[vE;vN;vU]
+	pos=[lat;lon;hgt] %维；经；高
+	失准角phi=[phiE;phiN;phiU]
+	加速度误差dvn
+	位置误差dpos=[dlat;dlon;dhgt]
+	脱离漂移eb=[ebx;eby;ebz] %ε在b系下投影
+	加表零偏db=[dbx;dby;dbz]
+	脱离随机游走/白噪声web
+	加速度计随机游走/白噪声wdb
+	陀螺标定误差矩阵dKg
+	加表标定误差矩阵dKa
+	IMU误差结构体imuerr，包含较多，见imuerrset函数
+	
+	wnie地球自转在n系投影
+	phim/dvbm误差补偿后的等效旋转矢量/速度增量
+	gn当地重力；gcc有害加速度
+	trj仿真轨迹结构体（见trjsimu函数）
+	ins北方位捷联导航解算结构体（见insinit函数）
+	eth地球相关计算结构体（见ethinit函数）
+	kf Kalman滤波结构体（见kfinit函数）
+	ps POS信息融合结构体（POS Fusion）
+
+8、数据提取
+	test_IMUAVPGPS_extract_trans.m示例
+
+9、绘图
+	myfig绘制白底全屏图
+	xygo启用网格（grid on），给出坐标标识（由labeldef给出）
+	labeldef为简洁给出坐标简写，见labeldef.m
+	
+	imuplot
+	gpsplot
+	magplot磁力计
+	odplot里程计
+	baroplot气压高度
+	
+	insplot导航结果绘图
+	inserrplot/avpcmpplot导航误差/比较绘图
+	kfplot/xpplot；Kalman滤波结果状态或均方差对角线元素
+	
+	进度条函数timebar
+
+10、姿态表示方法转换
+	姿态阵m
+	欧拉角a
+	四元数q
+	等效旋转矢量rv
+	四元数与失准角
+	姿态角与失准角
+	
+11、轨迹生成
+	trjsegment函数分段设计轨迹
+	trjsimu函数
+
+12、误差模拟
+	imuerrset设置各种误差参数
+	imuadderr注入误差
+
+13、不可交换误差补偿
+	cnscl函数，通过固定系数补偿，4种模式
+	
+	多项式角运动条件下的精确数值解法
+
+14、初始对准
+
+15、卡尔曼滤波
+	psinstypedef状态维数/量测维数定义
+	kfinit滤波器主要参数初始化
+	kfsetting直接设置集中特定类型IMU的滤波器参数
+	kffk/kfhk计算状态转移矩阵/量测矩阵，etm惯导误差传播函数
+	kfupdate：KF时间/量测更新
+	kffeedback滤波状态反馈，可用部分反馈方法
+	kfstat滤波误差分配与可观测度分析（协方差分析）
+	kfplot绘图
+	sinsgps典型的193或196松组合导航
+	POSProcessing 343或346维双向滤波松组合
+
+16、系统级标定
+	sysclbt系统级标定43维状态/3维速度误差量测
+	imuclbt对IMU数据标定修正处理
+	clbtfile标定参数文件读写
+	clbtdiff比较两次标定之间偏差
+
+17、C++导航库
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

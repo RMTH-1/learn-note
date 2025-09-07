@@ -1,0 +1,196 @@
+一、数据类型
+char     int8_t
+uchar    uint8_t    1    0xff
+short    int16_t
+ushort   uint16_t   2    0xff ff
+int      int32_t
+uint     uint32_t   4    0xff ff ff ff
+ulong    4
+float    4
+----------------------------------------------------------------------------
+while(1)
+{
+
+}
+先执行在判断
+do
+{
+
+}while(i <= 100);
+----------------------------------------------------------------------------
+static
+1、限制作用域，使用static后只在此文件内有效，不能被其他文件引用
+2、管理生命周期
+static int a;  //静态变量，如果是局部变量，会被初始化为0，只初始化一次（全局变量会自动初始化，而局部变量初值不定）
+static void f()  //静态函数
+{}
+----------------------------------------------------------------------------
+define
+#define OPEN_LOG
+#define EM_LOG_LEVEL
+#define APPID "123456"
+#define PI 3.14
+#define MAX_LEN (100+1)
+#define MAX(a,b) ((a)>(b) ? (a):(b))
+...
+
+条件编译
+#define            定义一个预处理宏
+#undef            取消宏的定义
+
+#if                   编译预处理中的条件命令，相当于C语法中的if语句
+#ifdef              判断某个宏是否被定义，若已定义，执行随后的语句
+#ifndef            与#ifdef相反，判断某个宏是否未被定义
+#elif                若#if, #ifdef, #ifndef或前面的#elif条件不满足，则执行#elif之后的语句，相当于C语法中的else-if
+#else              与#if, #ifdef, #ifndef对应, 若这些条件不满足，则执行#else之后的语句，相当于C语法中的else
+#endif             #if, #ifdef, #ifndef这些条件命令的结束标志.
+defined         　与#if, #elif配合使用，判断某个宏是否被定义
+例1 头文件条件编译
+#ifndef ABCD_H
+#define ABCD_H
+//定义、引用其他
+#endif
+例2 代码条件编译
+#ifdef _DEBUG
+
+#endif
+#ifdef _WIN32
+
+#endif
+----------------------------------------------------------------------------
+enum枚举
+定义一个网络状态的枚举，第一个赋初值，依次递增
+typedef enum
+{
+	NET_INIT = 0,
+	NET_CONNECTING,
+	NET_CONNECT_SUCCESS,
+	NET_CONNECT_FAIL,
+	NET_ERROR,
+}NET_STATUS;
+----------------------------------------------------------------------------
+struct
+1、
+typedef struct
+{
+	int a;
+	int b;
+	int c;
+}A_n;
+2、嵌套
+----------------------------------------------------------------------------
+回调函数
+----------------------------------------------------------------------------
+数据结构
+
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+注释：三种
+	//
+	/**/
+	#if 0
+	#endif
+1、printf函数有返回值，默认返回字符长度
+2、++i 先计算再取值
+   i++ 先取值再计算
+3、% 两边只能是整数
+4、数要有单位，例如：123L表示long
+				   123LL表示long long 
+	#define SEC_YEAR   (60LL*60LL*24LL*365LL)
+5、缓冲区的概念
+	printf("\n");  \n能清除缓冲区
+	建议用printf加上\n，防止无法输出
+6、scanf函数   一个危险的函数
+	接收多个内容时，中间别加，输入可用空格、tab、回车
+	在循环中使用时要校验返回值，防止bug
+	%s危险，因为不知道字符串长度
+	* 抑制符
+		两个scanf连用的时候，可用抑制符吃掉一个字符来防止bug，或者用getchar();
+		scanf("%d", &i); scanf("%*c%c", &ch);
+7、gets危险，可用fgets代替
+8、数组初始化（部分或全部）会从auto变成static
+
+字符输入输出
+	1、gets()，函数危险，无法检查输入长度是否超过定义的上限
+	2、scanf("%s",str)，输入不能有分隔符，如空格、tab、回车，都会结束输入
+	3、输出puts(), printf
+	4、错误：str = "hello";
+字符函数
+	1、strlen 以尾0(\0)为结束，计算长度 | sizeof 计算字符串真正占有的长度，包括\0
+	2、strcpy(str, "abc"); 有溢出问题 | strncpy(str, "abc", strsize - 1); 避免溢出
+	3、strcat | strncat
+	4、strcmp 比较 | strncmp 比较前n个
+
+指针
+	1、常量指针：指针指向的内容不能变 | 指针常量：指针的指向不能变
+	const int *p            int *const p           const int *const p
+	2、数组指针：int (*p)[3];
+	   指针数组：int * arr[3];
+	3、指针函数：int * fun(int a);
+	   函数指针：int (*p)(int);
+	   函数指针数组：int (*arr[N])(int);
+构造类型
+	1、结构体
+	2、共用体union、位域问题
+	3、枚举enum
+动态内存管理
+malloc	calloc	realloc  free
+	谁申请谁释放，free只是让指针没有通过引用访问申请到空间的权限。
+	free(p); p=NULL;	小心野指针问题
+
+二叉树
+	满二叉树： k   (2^k)-1
+	完全二叉树：
+	存储： 顺序，链式
+	遍历： 按行，先序，中序，后序
+	
+---------------------------------------------------------------------------------------
+linux_c
+
+1. io
+	fopen() 失败会设置errno
+		两个查看errno的函数 perror("fopen()") \ fprintf(stderr,"fopen():%s\n",strerror(errno));
+		包含头文件          error.h             string.h
+	
+	ch = fgetc(fp)    成功返回int，否则返回EOF  fputc(ch,fp)
+	
+	fgets(buf,size,fp) 失败返回NULL   fputs(buf,fp)
+	
+	fread(buf,size,num,fp) \ fwrite(buf,size,num,fp)  返回值为成功的个数 <= num
+		fread(buf,1,10,fp)  fread(buf,10,1,fp) 从返回值来看，前者安全
+	
+	fprintf(stream,format,...) 比printf多了流的选择 printf(format,...)
+	
+	atoi(str) 字符串str转化为int，只转化str开头是数字的部分，如"123a45" -> 123
+	
+	sprintf(str,format,...) 把内容写到str中，拼接各种内容
+	snprintf(str,size,format,...) 解决sprintf()的一些问题，多给了一个参数size，越界问题
+	
+	文件位置指针
+		fseek(stream,offset,whence)  偏移量  SEEK_SET, SEEK_CUR, SEEK_END 返回值：失败-1
+		ftell(stream)      返回值为long类型的offset
+		rewind(stream)  返回值为void，相当于  (void) fseek(stream, 0L, SEEK_SET)
+		
+	缓冲区：大多数情况下是好事，合并系统调用
+		行缓冲：换行刷新，满了刷新，强制刷新 （标准输出是这样，因为是终端设备）
+		全缓冲：满了刷新，强制刷新 （默认，只要不是终端设备）
+		无缓冲：如stderr，需要立即输出的内容
+		fflush(stream)  刷新缓冲区，stream为NULL则刷新所有打开的流
+		setvbuf()函数，改缓冲区模式
+	getline()函数，获取一行
+---------------------------------------------------------------------------------------
+makefile
+
+OBJS=main.o tool1.o tool2.o
+CC=gcc
+CFLAGS+=-c -Wall -g
+
+mytool:$(OBJS)
+	$(CC) $^ -o $@
+
+%.o:%.c
+	$(CC) $^ $(CFLAGS) -o $@
+
+clean:
+	$(RM) *.o mytool -r

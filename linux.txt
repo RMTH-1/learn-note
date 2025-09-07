@@ -1,0 +1,164 @@
+路径：绝对路径和相对路径
+.    当前目录
+..   上级目录
+~    home
+
+1、ls [-a -l -h] [路径] （-a显示隐藏文件、-l列表显示、-h显示大小单位）
+ls -alh /home/centos
+ls -lh
+
+2、cd [路径]
+cd  cd ~  cd /home/centos
+cd /
+
+3、pwd  （显示当前路径）
+cd
+pwd   (/home/centos)
+
+4、mkdir [-p] [路径]  （创建文件夹）（-p连续创建多级）
+cd
+mkdir test
+
+5、touch [路径]  （创建文件）
+touch test.txt
+
+6、cat [路径]   （查看全部）
+cat test.txt
+
+7、more [路径]   （文件太多会翻页，空格翻页，q退出）
+more /etc/services
+
+8、cp [-r] [路径1] [路径2]   （复制1到2，-r复制文件夹）
+cp test.txt test
+cp -r test2 test
+
+9、mv [路径1] [路径2]   （移动1到2） 如果不存在可以进行改名
+
+10、rm [-r -f] [路径1] [路径2] ...    （删除，-r文件夹删除，-f强制删除，参数可以用通配符*，用来模糊匹配）慎用
+
+11、which 命令   （查找命令的路径）
+which cd
+
+12、find   （查找文件）
+	（1）find 起始路径 -name "文件名"    （支持通配符）
+	
+	（2）find 起始路径 -size +-n[kMG]     （+大于，-小于，k是kb，M是mb，G是gb）
+	
+13、echo " "      （输出指定内容）
+反引号` `可执行命令
+echo "ls"     ls
+echo `ls`     ...
+
+14、重定向符
+>   覆盖写入
+>>  追加写入
+
+15、tail [-f -num] 路径  （-f持续追踪，-num查看尾部多少行，默认10）
+
+16、grep [-n] 关键字 文件路径     （-n结果中显示匹配的行号，路径可作为管道符输入）
+
+17、wc [-c -m -l -w] 文件路径    （-c字节数，-m字符数，-l行数，-w单词书，路径可作为管道符输入）
+
+18、管道符|      将左边的命令结果作为右边的输入
+
+19、su [-] 用户名   （切换用户，-加载环境变量，用户名省略表示切换root）
+exit 退回上一个用户ctrl+d
+
+20、sudo
+让普通用户带有root权限  sudo 命令
+需要在root用户下执行visudo，配置普通用户sudo权限
+
+21、
+groupadd 添加组
+groupdel 删除组
+useradd [-g -d] 用户名     （-g指定组，不指定会创建同名的组，-d指定home路径，默认/home/。。）
+userdel [-r] 用户名    （-r删除home目录，不写不删）
+usermod -aG 组 用户名      （将用户加到指定组）
+id 用户名         （查看用户信息）
+getent passwd   查看系统全部用户信息
+getent group    查看系统全部组信息
+
+22、chmod [-R] 权限 文件         （改文件权限，-R对文件夹内全部应用）rwx
+chmod 751 test.txt
+
+23、chown [-R] 用户：用户组 文件    （该文件所属的用户和用户组，-R对文件夹的全部应用）
+仅root用户可用
+
+24、快捷键
+ctrl c 强制停止
+ctrl d 退出
+history查看历史命令
+! 命令  自动匹配上一个命令
+ctrl r 搜索上一个命令
+ctrl a/e 光标移动到命令开始/结束
+ctrl ->/<-光标向右/左移动一个单词
+ctrl l清屏
+
+25、yum [-y] [install | remove | search] 软件名称     （安装软件，-y自动确认）
+Ubuntu系统 用apt
+
+26、systemctl start | stop | status | enable | disable 服务名  （启动/关闭/查看状态/开机自启/关闭开机自启）
+
+27、ln -s 参数1 参数2   （软链接，-s创建软链接，1被链接的文件或文件夹，2要链接去的目的地）
+ln -s /etc/yum ~/yum
+
+28、ping [-c num] ip或主机名     （测试服务器是否可联通，-c测试次数，默认无限次）
+
+29、wget [-b] url    （网络文件的下载，-b后台下载，日志写入wget-log）
+
+30、curl [-O] url    （发起网络请求，可获取HTML源码，-O可用于下载）
+
+31、端口
+公认端口1-1023，系统内置或知名软件
+注册端口1024-49151，用于自定义
+动态端口49152-65535
+查看端口
+nmap IP    查看指定IP对外暴露的端口
+netstat -anp | grep 端口号      查看本机对端口的占用情况
+
+32、进程
+ps -ef | grep 关键字    过滤查看进程
+kill [-9] 进程号       （关闭指定进程，-9强制）
+
+33、
+top            （查看进程）
+df             （磁盘使用率）
+iostat         （磁盘速率）
+sar -n DEV     （网络情况）
+
+34、tar [-c -v -x -f -z -C] 参数 参数...   （-c压缩，-v进度，-x解压，-f创建或解压的文件，-zgzip模式，-C选择解压目的地）
+-z一般位于第一个
+-f必须在最后一个
+-C单独使用
+tar -cvf test.tar test1.txt test2.txt test3.txt
+tar -zcvf test.gz test1.txt test2.txt test3.txt
+
+tar -xvf test.tar
+tar -xvf test.tar -C test
+tar -zxvf test.gz
+tar -zxvf test.gz -C test
+
+zip [-r] 参数...         （-r压缩文件夹）
+zip -r test.zip test test1.txt
+unzip [-d] 参数          （-d指定要解压去的路径）
+unzip test.zip -d test
+----------------------------------------------------------------------
+WSL
+wsl --set-default-version2
+wsl -l -v   查看wsl安装的linux
+wsl --unregister name    删除name
+wsl --export Ubuntu Ubuntu.tar  备份Ubuntu
+wsl --import name url .\Ubuntu.tar   还原，将备份的文件还原成name路径为url
+wsl -d Ubuntu --user Ubuntu
+wsl -t ubuntu   关闭某个子系统
+wsl --shutdown   关闭所有子系统
+
+----------------------------------------------------------------------
+1、配置vim
+cp /etc/vimrc ~/.vimrc       将vim配置文件复制到用户家目录，并隐藏
+
+2、一些快捷键
+	1）进入可视化模式，选择代码块，=
+	2）vim .vimrc 加一行set tabsotp=4
+	3）CTRL+p关键字补全
+	4）shift+k跳man手册

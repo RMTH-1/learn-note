@@ -1,0 +1,339 @@
+一、基本配置
+1、新建工程输入芯片型号
+蓝桥杯板CT117E_M4（stm32g431rbt6）
+2、system里面SYS的Debug选中Serial Wire
+3、RCC的HSE选择Crystal/
+4、切换到时钟树，点通HSE、PLL，HCLK输入72，80回车
+5、切换到工程，填工程名，改路径
+6、IDE选择MDK-ARM，版本选V5
+7、到CodeGenerator，勾选Generate p...
+
+二、GPIO配置
+1、PC8-PC15设为推挽输出，且置高，PD2控制使能
+2、PB0，PB1，PB2，PA0设置输入
+
+
+三、串口部分 (0x0d:\r   0x0a:\n)
+1、先将PA9选USART1_TX, PA10选USART_RX
+2、USART，mode改为Asynchronous，波特率115200
+3、打开串口中断
+#define BUFFERSIZE 256
+uint8_t Rx_tem = 0;
+uint8_t Rx_buff[BUFFERSIZE] = {0};
+uint8_t Rx_flg = 0;
+unsigned int Rx_cnt = 0;
+HAL_UART_Receive_IT(&huart1, &Rx_tem, 1); //中断接收，数据地址和大小
+HAL_UART_Transmit(&huart1, (uint8_t *)Str_off, strlen(Str_off), 0xffff); //阻塞发送，数据地址和大小，延时
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if(huart == &huart1)
+    {
+        Rx_buff[Rx_cnt] = Rx_tem;
+        Rx_cnt ++;
+        if(Rx_tem == 0x0a)
+        {
+            Rx_flg = 1;
+        }
+        HAL_UART_Receive_IT(&huart1,&Rx_tem, 1);
+    }
+}
+void Uart_Pro()
+{
+	char LineStr[20] = {0};
+    if(Rx_flg == 1)
+    {
+		...
+		Rx_flg = 0;
+        for(int m = 0; m < Rx_cnt; m++)  //memset(Rx_buf, 0, Rx_cnt);
+        {
+            Rx_buff[m] = 0;
+        }
+        Rx_cnt = 0;
+    }
+}
+
+if(Rx_cnt != 0)
+      {
+          uint8_t temp = Rx_cnt;
+          HAL_Delay(10);
+          if(temp == Rx_cnt) uart_scan();
+      }
+
+四、LCD部分
+LCD_Init();  //LCD初始化
+LCD_Clear(Blue);  //清屏
+LCD_ClearLine(Line1);  //清行
+LCD_SetBackColor(Blue);   //设置背景色
+LCD_SetTextColor(White);  //设置文本颜色
+LCD_DisplayStringLine(Line1, u8 *ptr);  //显示一行
+sprintf(LineStr, "   Str:%d  ", d);  // stdio.h
+LCD_DisplayChar(Line1, u16 lie, u8 Ascii);  //某个位置显示单个字符
+
+五、AD转换部分（PB15-R37, PB12-R38）
+1、PB15选ADC2_IN15
+void Adc_Pro(void)
+{
+if(uwTick - uwTick_adc < 200) return;
+    uwTick_adc = uwTick;
+	HAL_ADC_Start(&hadc2);
+	HAL_ADC_PollForConversion(&hadc2, 1000);
+	voltage = HAL_ADC_GetValue(&hadc2) * 3.3 / 4096;
+}
+
+  DA部分
+  
+HAL_DAC_Start(&hdac1,DAC_CHANNEL_1); // 使能DAC1的通道1
+void DAC1_Set_Vol(float vol)
+{
+	uint16_t temp;
+	temp = (4096 * vol/3.3f);
+	HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, temp);
+}
+
+六、基本定时器（6，7）
+1、使能定时器，并打开定时器中断
+2、设置预分频和计数值
+HAL_TIM_Base_Start_IT(&htim7);  //中断打开基本定时器7
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    if(htim == &htim7)
+    {
+    }
+}
+
+七、RTC部分
+1、使能RTC的Clock Source和Calendar，改时间日期
+2、选HSE_RTC，设74和9999
+RTC_TimeTypeDef Time;  //定义rtc时间和日期结构体
+RTC_DateTypeDef Date;
+HAL_RTC_GetTime(&hrtc, &Time, RTC_FORMAT_BIN);  //读取时间和日期必须同时使用，缺少日期则不计数
+HAL_RTC_GetDate(&hrtc, &Date, RTC_FORMAT_BIN);
+
+八、PWM部分
+1、选TIM2_CH2，对应PA1
+2、设置时钟源为内部时钟源
+3、设置CH2为PWM Generation CH2
+4、开启定时器中断
+5、设79和999就是1kHZ
+6、Mode 选PWM mode 1
+7、可预设占空比50
+HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
+__HAL_TIM_CLEAR_IT(&htim2, TIM_IT_UPDATE);  //清除中断，一般要加
+__HAL_TIM_SetCompare(&htim2, TIM_CHANNEL_2, PWMvalue);  //占空比=100*pwmvalue/计数周期
+
+8、变频率和占空比(分频系数为1时)
+uint8_t pa1_autoreload;
+float duty = 0.5;
+pa1_autoreload = 80000000/freq;
+__HAL_TIM_SetAutoreload(&htim2, pa1_autoreload);  //变频率
+__HAL_TIM_SetCompare(&htim2, TIM_CHANNEL_2, (int)(pa1_autoreload*duty));  //写入占空比
+
+
+九、定时器输入捕获（频率、占空比）
+1、PA15、PB4，选通道1
+2、定时器slave mode选Reset mode
+3、Trigger 选TI1FP1
+4、内部时钟、通道1直接模式
+5、80分频、打开中断
+----占空比
+6、通道2间接捕获，下降沿触发
+
+十、eeprom
+1、PB6，PB7设置gpio-output
+
+函数部分
+void LED_Disp(uint8_t dsLed)
+{
+    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(GPIOC, dsLed << 8, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_RESET);
+}
+
+void KEY_Pro(void)
+{
+    if(uwTick - uwTick_key < 100) return;
+    uwTick_key = uwTick;
+    if(!HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_0))
+    {
+        HAL_Delay(10);
+        if(!HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_0))
+        {
+            
+            while(!HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_0));
+        }
+    }
+    if(!HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_1))
+    {
+        HAL_Delay(10);
+        if(!HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_1))
+        {
+            
+            while(!HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_1));
+        }
+    }
+    if(!HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_2))
+    {
+        HAL_Delay(10);
+        if(!HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_2))
+        {
+            
+            while(!HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_2));
+        }
+    }
+    if(!HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0))
+    {
+        HAL_Delay(10);
+        if(!HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0))
+        {
+            
+            while(!HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0));
+        }
+    }
+}
+
+int Get_Fq(char* str)  //获取频率
+{
+    uint8_t num = 0;
+    int start = -1;
+    for(int n = 0; n < strlen(str); n++)
+    {
+        if(str[n] >= '0' && str[n] <= '9')
+        {
+            num ++;
+            if(start == -1)
+            start = n;
+        }
+    }
+    int factor = 1;
+    uint8_t sum = 0;
+    for(int n = 0; n < num - 1; n++)
+    {
+        factor *= 10;
+    }
+    for(int n = 0; n < num; n++)
+    {
+        sum += factor * (str[n + start] - '0');
+        factor /= 10;
+    }
+    return sum;
+}
+
+//eeprom的读写函数   0xa1读    0xa0写
+uint8_t eeprom_read(uint8_t addr)
+{
+    uint8_t date;
+    I2CStart();
+    I2CSendByte(0xa0);
+    I2CWaitAck();
+    I2CSendByte(addr);
+    I2CWaitAck();
+    I2CStop();
+    I2CStart();
+    I2CSendByte(0xa1);
+    I2CWaitAck();
+    date = I2CReceiveByte();
+    I2CWaitAck();
+    I2CStop();
+    return date;
+}
+
+void eeprom_write(uint8_t addr, uint8_t date)
+{
+    I2CStart();
+    I2CSendByte(0xa0);
+    I2CWaitAck();
+    I2CSendByte(addr);
+    I2CWaitAck();
+    
+    I2CSendByte(date);
+    I2CWaitAck();
+    I2CStop();
+}
+
+//mcp4017   0x5f读   0x5e写
+默认50K即63，   阻值=（读到的值/127）* 100K
+PB14电压值 V_data = 3.3*(R/(R+10))
+void MCP4017_write(uint8_t data)
+{
+    I2CStart();
+    I2CSendByte(0x5e);
+    I2CWaitAck();
+    I2CSendByte(data);
+    I2CWaitAck();
+    I2CStop();
+    HAL_Delay(10);
+}
+
+uint8_t MCP4017_read()
+{
+    uint8_t data;
+    I2CStart();
+    I2CSendByte(0x5f);
+    I2CWaitAck();
+    data = I2CReceiveByte();
+    I2CSendNotAck();
+    I2CStop();
+    return data;
+}
+
+uint freq1, freq2;
+float duty1, duty2;
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+{
+    uint capvalue1, capvalue2;
+    double capcount1, capcount2;
+    if(htim->Instance == TIM3)
+    {
+        if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)
+        {
+            capvalue1 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
+            capcount1 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2);
+            __HAL_TIM_SetCounter(htim, 0);
+            freq1 = (80000000 / 80) / capvalue1;
+            duty1 = (capcount1 / capvalue1) * 100;
+            HAL_TIM_IC_Start(htim, TIM_CHANNEL_1);
+            HAL_TIM_IC_Start(htim, TIM_CHANNEL_2);
+        }
+    }
+    if(htim->Instance == TIM8)
+    {
+        if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)
+        {
+            capvalue2 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
+            capcount2 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2);
+            __HAL_TIM_SetCounter(htim, 0);
+            freq2 = (80000000 / 80) / capvalue2;
+            duty2 = (capcount2 / capvalue2) * 100;
+            HAL_TIM_IC_Start(htim, TIM_CHANNEL_1);
+            HAL_TIM_IC_Start(htim, TIM_CHANNEL_2);
+        }
+    }
+}
+
+enum LED
+{
+    LD1 = 0, LD2, LD3, LD4, LD5, LD6, LD7, LD8
+}upper = LD1, lower = LD2;
+
+union
+{
+    float a;
+    uint8_t b[4];
+}float_data1, float_data2;
+
+---------------------------------------------------------------
+1、lcd屏不显示内容：各种初始化要写在后面
+2、中断：按键tim，输入捕获，串口 ；无中断：pwm，adc
+3、占空比捕获不显示，被除数小于除数，要为浮点数，否则为0
+4、char* state[3] = {"Normal", "Upper", "Lower"};
+5、pwm输出设置Period为100-1；
+6、变频率和占空比时，注意分频系数的设置
+7、systick有问题，定时用tim写也行
+8、%m.nf，m为总长度，有正负；n为小数点后位数。
+9、adc获取不要在lcd某一页调用，这样其他页，adc值不更新。
+10、dac可能用tim6，按键用tim7实现。
+11、lcd和led冲突问题（在首加上u16 pcout = GPIOC->ODR，尾加上GPIOC->ODR = pcout）
+	void LCD_WriteReg(u8 LCD_Reg, u16 LCD_RegValue);
+	void LCD_WriteRAM_Prepare(void);
+	void LCD_WriteRAM(u16 RGB_Code);

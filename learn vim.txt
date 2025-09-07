@@ -1,0 +1,58 @@
+配置
+
+学习操作
+	模式：正常normal；插入insert；可视visual
+	jj插入到正常模式，v正常到可视，：命令模式，
+	i前插 I行前
+	a后插 A行后
+	o下一行 O上一行
+	
+	移动hjkl，可加数字
+	begin词前，end词后
+	gg第一行，G最后一行
+	0行首，￥行尾
+	f向后查找（同一行）
+	m+字符标记，‘+字符跳转
+	gj/gk折行移动
+	C+n/p提示上下选择
+	
+	操作符
+	d删除；c修改；y复制；v选中并进入可视模式
+	C删除光标到行尾
+	dd删除一行，p复制，u撤销
+	i和a的区别
+	ciw/caw，diw/daw
+	b=（；B={
+	di）/ci）；dib/cib
+	di‘/ci’
+	dfs/cfs删除到s
+	die/cie删除全部，yie整个复制
+	
+	可视模式下，U大写，u小写
+	
+	gd：go to definition
+	【d/】d报错
+	C+o返回
+	gh悬浮查看
+	gt下一个，gT上一个
+	
+	C+d下翻，C+u上翻
+	
+	多行编辑，C+V选中，I进入编辑
+	
+	.重复修改
+	
+	easymotion
+	leader+s+字符：寻找； +s+n
+	
+	sneak
+	s+a+b寻找ab
+	
+	surround
+	cs‘“修改/ds'删除’
+	ysiw‘添加’
+	
+	
+	
+	
+	
