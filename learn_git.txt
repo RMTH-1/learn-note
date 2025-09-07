@@ -36,9 +36,12 @@ git remote add 别名(github) 仓库地址
 
 推送到远程
 git push 别名(origin) master
+git push -u origin master
 
 拉取
 git pull origin master
+把我的新工作移到别人已经完成的最新工作之上
+git pull --rebase origin master
 
 提交流程：
 	1、创建（克隆/新建）
